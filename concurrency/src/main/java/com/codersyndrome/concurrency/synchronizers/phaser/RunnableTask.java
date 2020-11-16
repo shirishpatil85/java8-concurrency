@@ -21,12 +21,13 @@ public class RunnableTask implements Runnable {
 	@Override
 	public void run() {
 		print("After register");
-		for (int i = 0; i < 2; i++) {
+		for (int i = 1; i < 4; i++) {
 			sleep();
 			print("Before await " + i + ":");
 			this.phaser.arriveAndAwaitAdvance();
-			print("After advance " + i + ":");
+			print("After advance phase [" + i + "] :");
 		}
+		this.phaser.arriveAndDeregister();
 	}
 
 	private void sleep() {

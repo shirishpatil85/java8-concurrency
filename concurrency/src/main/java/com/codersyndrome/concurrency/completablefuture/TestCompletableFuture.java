@@ -21,10 +21,11 @@ public class TestCompletableFuture {
 
 		ThreadFactory threadFactory = new ThreadFactoryBuilder().setName("Thead").build();
 		ExecutorService executor = Executors.newFixedThreadPool(1, threadFactory);
-		CompletableFuture.runAsync(
+		CompletableFuture<Void> runCf = CompletableFuture.runAsync(
 				() -> System.out.println(Thread.currentThread().getName() + "-This is inside a thread"), executor);
 
-		CompletableFuture.supplyAsync(() -> Arrays.asList("Banana", "Orange", "Apple"))
+		CompletableFuture<Void> fruitNameCf = CompletableFuture
+				.supplyAsync(() -> Arrays.asList("Banana", "Orange", "Apple"))
 				.thenApplyAsync(l -> l.stream().filter(a -> a.equalsIgnoreCase("Orange")).findFirst(), executor)
 				.thenAcceptAsync(t -> System.out.println(Thread.currentThread().getName() + "-" + t.get()), executor);
 
@@ -36,9 +37,18 @@ public class TestCompletableFuture {
 		Function<List<Integer>, CompletionStage<Integer>> aFunction = a -> CompletableFuture
 				.supplyAsync(() -> a.stream().max(Integer::compareTo).get());
 
-		CompletableFuture.supplyAsync(() -> Arrays.asList(1, 20, 3)).thenComposeAsync(aFunction)
-				.thenAccept(a -> System.out.println("The max number is-" + a));
+		CompletableFuture<Void> maxCf = CompletableFuture.supplyAsync(() -> Arrays.asList(1, 20, 3))
+				.thenComposeAsync(aFunction).thenAccept(a -> System.out.println("The max number is-" + a));
 
 		executor.shutdown();
+		try {
+			runCf.join();
+			System.out.println("fruitNameCf.get() = " + fruitNameCf.get());
+			System.out.println("addition.get() = " + addition.get());
+			multiplication.get();
+			System.out.println("maxCf.get() = " + maxCf.get());
+		} catch (Exception ex) {
+			System.out.println("Exception occurred " + ex.getMessage());
+		}
 	}
 }
